@@ -1,12 +1,8 @@
 # Maison Connectée
 
-
-
 ## Membres de l'équipe
-- **Alessio Masi**  
-- **Gisele Lauren Ambassa Assene**
-
----
+- **Alessio Masi** : Responsable de la partie physique du projet, incluant le câblage, la programmation sur Arduino, et l'intégration des capteurs et actuateurs.
+- **Gisele Lauren Ambassa Assene** : Responsable du développement de l'application mobile, utilisant MIT App Inventor pour interagir avec les composants matériels via Bluetooth.
 
 ## Table des Matières
 - [Brève Description du Projet](#brève-description-du-projet)
@@ -17,6 +13,8 @@
 - [Bilan](#bilan)
 - [Plan Futur](#plan-futur)
 - [Références](#références)
+
+---
 
 ## Brève Description du Projet
 La réalisation de ce projet vise à développer une maison connectée capable d'améliorer la sécurité, le confort, et l'efficacité énergétique. 
@@ -78,6 +76,18 @@ Démontrer les avantages des capteurs intelligents pour améliorer la vie quotid
    - L’utilisation d’un tag NFC permet de verrouiller ou déverrouiller la porte.  
    - Le servo-moteur agit selon les commandes reçues.  
 
+### Implémentation Technique
+- **Arduino IDE :**
+  - Le projet comporte deux fichiers de code principaux :
+    1. Un fichier pour l’Arduino Uno, responsable de la gestion des capteurs (température, gaz) et des LEDs.
+    2. Un fichier pour la Nucleo F411-RE, utilisé pour le contrôle du NFC et du servo-moteur pour la porte.
+  - Chaque fichier est documenté pour faciliter la compréhension et la maintenance.
+
+- **MIT App Inventor :**
+  - L’application mobile, développée avec MIT App Inventor, permet de :
+    - Recevoir les données des capteurs via Bluetooth.
+    - Envoyer des commandes pour interagir avec le système (par exemple, activer/désactiver des fonctionnalités).
+
 **Vidéo de démonstration :** Une vidéo est incluse pour présenter toutes les fonctionnalités en action.
 
 ---
@@ -96,6 +106,13 @@ Démontrer les avantages des capteurs intelligents pour améliorer la vie quotid
 | Fils et autres         | 4,00              |  
 | Batterie externe (x2)  | 40,00             |  
 | **Total**              | **135,22 €**      |
+
+### Temps de Travail
+Le projet a nécessité un total de **36 heures**, réparties comme suit :
+- **18 heures** de cours en classe (à raison de 6 séances de 3 heures chacune).
+- **18 heures** de travail individuel effectué en dehors des heures de cours.
+
+L’ensemble du travail a principalement été réalisé dans le **Fablab**.
 
 ---
 
@@ -116,7 +133,7 @@ Démontrer les avantages des capteurs intelligents pour améliorer la vie quotid
 
 ### Améliorations possibles :
 1. **Ajout de capteurs :**
-   - Intégration de capteurs de mouvement et d’humérité pour enrichir la maquette.
+   - Intégration de capteurs de mouvement et d’humidité pour enrichir la maquette.
 
 2. **Amélioration de l’application mobile :**
    - Notifications en temps réel.
