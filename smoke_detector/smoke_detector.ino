@@ -1,121 +1,193 @@
-// #include <SoftwareSerial.h>
-// #include <Wire.h>
-// #include "Seeed_MCP9808.h"
-
-// // Communication setup
-// SoftwareSerial nucleoSerial(2, 3); // RX, TX (connected to Nucleo)
-// MCP9808 tempSensor;
-
-// // Pins and thresholds
-// const int gasSensorPin = A0;
-// const int ledPinKitchen = 11;
-// const int ledPinLiving = 12;
-// const int buzzerPin = 10;
-// const int gasThreshold = 500;
-// int tempThreshold = 25; // User-configurable
-
-// void setup() {
-//   nucleoSerial.begin(9600); // Communication with Nucleo
-//   Serial.begin(9600);       // Debugging
-  
-//   pinMode(ledPinKitchen, OUTPUT);
-//   pinMode(ledPinLiving, OUTPUT);
-//   pinMode(buzzerPin, OUTPUT);
-
-//   if (tempSensor.init()) { 
-//     Serial.println("Could not find a valid MCP9808 sensor!");
-//     while (1);
-//   }
-  
-//   Serial.println("Arduino ready!!!");
-// }
-
-// void loop() {
-//   // Gas and temperature checks
-//   gasCheck();
-//   readTemp();
-
-//   // Handle commands from Nucleo
-//   if (nucleoSerial.available()) {
-//     String message = nucleoSerial.readStringUntil('\n');
-//     if (message.startsWith("#") && message.endsWith("#")) {
-//       message = message.substring(1, message.length() - 1); // Strip delimiters
-//       handleCommand(message);
-//     } else {
-//       Serial.println("Garbage data received");
-//     }
-//   }
-
-//   delay(100);
-// }
-
-// void gasCheck() {
-//   int gasValue = analogRead(gasSensorPin);
-//   Serial.println("Gas value: " + String(gasValue));
-
-//   if (gasValue > gasThreshold) {
-//     digitalWrite(ledPinKitchen, HIGH);
-//     digitalWrite(buzzerPin, HIGH);
-//     Serial.println("Smoke detected!");
-//     nucleoSerial.println("#ALERT_SMOKE#");
-//   } else {
-//     digitalWrite(ledPinKitchen, LOW);
-//     digitalWrite(buzzerPin, LOW);
-//   }
-// }
-
-// void readTemp() {
-//   float temp = 0;
-//   tempSensor.get_temp(&temp);
-//   Serial.println("Temperature: " + String(temp) + " C");
-
-//   if (temp > tempThreshold) {
-//     digitalWrite(ledPinLiving, HIGH);
-//     Serial.println("High temperature detected!");
-//     nucleoSerial.println("#ALERT_TEMP#");
-//   } else {
-//     digitalWrite(ledPinLiving, LOW);
-//   }
-// }
-
-// void handleCommand(String command) {
-//   Serial.println("Command received: " + command);
-
-//   if (command == "SET_TEMP_THRESHOLD") {
-//     // Example: Threshold set by the user
-//     tempThreshold = 30; // Placeholder, you can parse values if needed
-//     Serial.println("Temperature threshold updated to " + String(tempThreshold) + " C");
-//     nucleoSerial.println("#TEMP_THRESHOLD_SET#");
-//   } else if (command == "LOCK_DOOR") {
-//     Serial.println("Lock door command received.");
-//     digitalWrite(ledPinKitchen, LOW); // Example action
-//     nucleoSerial.println("#DOOR_LOCKED#");
-//   } else if (command == "UNLOCK_DOOR") {
-//     Serial.println("Unlock door command received.");
-//     digitalWrite(ledPinKitchen, HIGH); // Example action
-//     nucleoSerial.println("#DOOR_UNLOCKED#");
-//   } else {
-//     Serial.println("Unknown command: " + command);
-//   }
-// }
-
+#include <Wire.h>
+#include "Seeed_MCP9808.h"
 #include <SoftwareSerial.h>
-SoftwareSerial nucleoSerial(2, 3); // RX, TX
+#include "Ultrasonic.h"
+#ifdef USE_TINYUSB
+#include <Adafruit_TinyUSB.h>
+#endif
+
+MCP9808 tempSensor;
+Ultrasonic ultrasonic(0);
+SoftwareSerial bluetoothSerial(2,3);
+
+// Pins and thresholds
+const int gasSensorPin = A0;
+const int gazLed = A1;
+const int kitchenLed = A2;
+const int tempLed = A3;
+const int ledExternal = 1;
+const int redPinLiving = 4;
+const int greenPinLiving = 5;
+const int bluePinLiving = 6;
+const int redPinKitchen = 7;
+const int greenPinKitchen = 8;
+const int bluePinKitchen = 9;
+const int buzzerPin = 10;
+const int redPinEntrance = 13;
+const int greenPinEntrance = 12;
+const int bluePinEntrance = 11;
+int tempThreshold = 25; 
+const int gasThreshold = 500;
 
 void setup() {
-  nucleoSerial.begin(9600); // Match Nucleo's baud rate
   Serial.begin(9600);
-  Serial.println("Arduino ready!!!");
+  bluetoothSerial.begin(9600);
+
+  pinMode(gazLed, OUTPUT);
+  pinMode(kitchenLed, OUTPUT);
+  pinMode(tempLed, OUTPUT);
+  pinMode(ledExternal, OUTPUT);
+
+  pinMode(redPinLiving, OUTPUT);
+  pinMode(greenPinLiving, OUTPUT);
+  pinMode(bluePinLiving, OUTPUT);
+
+  pinMode(redPinKitchen, OUTPUT);
+  pinMode(greenPinKitchen, OUTPUT);
+  pinMode(bluePinKitchen, OUTPUT);
+
+  pinMode(buzzerPin, OUTPUT);
+
+  pinMode(redPinEntrance, OUTPUT);
+  pinMode(greenPinEntrance, OUTPUT);
+  pinMode(bluePinEntrance, OUTPUT);
+
+  if (tempSensor.init()) {
+    Serial.println("Could not find a valid MCP9808 sensor!");
+    while (1);
+  }
+
+  Serial.println("Arduino ready. Monitoring sensors...");
 }
 
 void loop() {
-  if (nucleoSerial.available()) {
-    //Serial.println("hello!!");
-    Serial.write(nucleoSerial.read());
-    //String message = nucleoSerial.read(StringUntil('\n'));
-    //Serial.println(String(message));
-    const int ledPinKitchen = 11;
-    pinMode(ledPinKitchen, OUTPUT);
-    digitalWrite(ledPinKitchen, HIGH);
+  gasCheck();
+  readTemp();
+  //checkEntrance();
+
+  //Manual Command Handling
+  if (Serial.available()) {
+    String command = Serial.readStringUntil('\n');
+    command.trim();
+
+    if (command.startsWith("SET_TEMP ")) {
+      int newThreshold = command.substring(9).toInt();
+      tempThreshold = newThreshold;
+      Serial.println("Temperature threshold set to " + String(tempThreshold) + " C.");
+    } 
+    else {
+      Serial.println("Unknown command: " + command);
+    }
   }
+  if(bluetoothSerial.available()){
+    String command = bluetoothSerial.readStringUntil('\n');
+    command.trim();
+    if(command.startsWith("1")){
+      
+      setKitchenLED(command);
+    }
+    else if(command.startsWith("2")){
+      
+      setKitchenLED(command);
+    }
+    else if (command.startsWith("LED")){
+      setMultiLED(command);
+    }
+
+    else if(command.startsWith("T ")){
+      Serial.write(bluetoothSerial.read());
+      int newThreshold = command.substring(9).toInt();
+      tempThreshold = newThreshold;
+      Serial.println("Temperature threshold set to " + String(tempThreshold) + " C.");
+    }
+  }
+
+  delay(500);
+}
+
+void gasCheck() {
+  int gasValue = analogRead(gasSensorPin);
+  //Serial.println("Gas value: " + String(gasValue));
+  bluetoothSerial.print("Gas " + String(gasValue));
+  bluetoothSerial.println("");
+
+  if (gasValue > gasThreshold) {
+    analogWrite(gazLed, 255);
+    tone(buzzerPin, 1000);
+    Serial.println("Smoke detected!");
+  } else {
+    analogWrite(gazLed, 0);
+    noTone(buzzerPin);
+  }
+}
+
+void readTemp() {
+  float temp = 0;
+  tempSensor.get_temp(&temp);
+  //Serial.println("Temperature: " + String(temp) + " C");
+  bluetoothSerial.print("Temperature " + String(temp));
+  bluetoothSerial.println("");
+  if (temp < tempThreshold) {
+    analogWrite(tempLed, 255);
+    //Serial.println("Low temperature detected!");
+  } else {
+    analogWrite(tempLed, 0);
+  }
+}
+
+void checkEntrance(){
+  long RangeInCentimeters;
+  RangeInCentimeters = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
+    if (RangeInCentimeters<=15){
+      digitalWrite(ledExternal, HIGH);
+    }
+    else{
+      digitalWrite(ledExternal,LOW);
+    }
+    Serial.print(RangeInCentimeters);//0~400cm
+    Serial.println(" cm");
+}
+
+void setKitchenLED(String command){
+  int ledNumber = command.toInt();
+  Serial.println("number: " + String(ledNumber));
+  if(ledNumber==1){
+    analogWrite(kitchenLed, 255);
+  }
+  else{
+    analogWrite(kitchenLed, 0);
+  }
+
+  // Set the LED colors
+  
+}
+
+
+void setMultiLED(String command) {
+  // Extract the RGB part of the command
+  int startIndex = command.indexOf(' ') + 1;
+  String rgbValues = command.substring(startIndex);
+
+  // Split the RGB values
+  int commaIndex1 = rgbValues.indexOf(',');
+  int commaIndex2 = rgbValues.indexOf(',', commaIndex1 + 1);
+
+  int red = rgbValues.substring(0, commaIndex1).toInt();
+  int green = rgbValues.substring(commaIndex1 + 1, commaIndex2).toInt();
+  int blue = rgbValues.substring(commaIndex2 + 1).toInt();
+
+  // Set the LED colors
+  analogWrite(redPinLiving, red);
+  analogWrite(greenPinLiving, green);
+  analogWrite(bluePinLiving, blue);
+
+  analogWrite(redPinKitchen, red);
+  analogWrite(greenPinKitchen, green);
+  analogWrite(bluePinKitchen, blue);
+
+  analogWrite(redPinEntrance, red);
+  analogWrite(greenPinEntrance, green);
+  analogWrite(bluePinEntrance, blue);
+
+  Serial.println("LED set to R:" + String(red) + " G:" + String(green) + " B:" + String(blue));
 }
