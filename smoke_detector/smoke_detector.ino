@@ -31,6 +31,7 @@ const int gasThreshold = 500;
 
 void setup() {
   Serial.begin(9600);
+  bluetoothSerial.begin(9600);
 
   pinMode(gazLed, OUTPUT);
   pinMode(kitchenLed, OUTPUT);
@@ -62,7 +63,7 @@ void setup() {
 void loop() {
   gasCheck();
   readTemp();
-  checkEntrance();
+  //checkEntrance();
 
   //Manual Command Handling
   if (Serial.available()) {
@@ -74,17 +75,30 @@ void loop() {
       tempThreshold = newThreshold;
       Serial.println("Temperature threshold set to " + String(tempThreshold) + " C.");
     } 
-    else if (command.startsWith("SET_LED_KITCHEN")) {
-      setKitchenLED(command);
-    }
-    else if(command.startsWith("SET_LED_LIVING")) {
-      setLivingLED(command);
-    }
-    else if(command.startsWith("SET_LED_ENTRANCE")) {
-      setEntranceLED(command);
-    }
     else {
       Serial.println("Unknown command: " + command);
+    }
+  }
+  if(bluetoothSerial.available()){
+    String command = bluetoothSerial.readStringUntil('\n');
+    command.trim();
+    if(command.startsWith("1")){
+      
+      setKitchenLED(command);
+    }
+    else if(command.startsWith("2")){
+      
+      setKitchenLED(command);
+    }
+    else if (command.startsWith("LED")){
+      setMultiLED(command);
+    }
+
+    else if(command.startsWith("T ")){
+      Serial.write(bluetoothSerial.read());
+      int newThreshold = command.substring(9).toInt();
+      tempThreshold = newThreshold;
+      Serial.println("Temperature threshold set to " + String(tempThreshold) + " C.");
     }
   }
 
@@ -93,7 +107,9 @@ void loop() {
 
 void gasCheck() {
   int gasValue = analogRead(gasSensorPin);
-  Serial.println("Gas value: " + String(gasValue));
+  //Serial.println("Gas value: " + String(gasValue));
+  bluetoothSerial.print("Gas " + String(gasValue));
+  bluetoothSerial.println("");
 
   if (gasValue > gasThreshold) {
     analogWrite(gazLed, 255);
@@ -108,11 +124,12 @@ void gasCheck() {
 void readTemp() {
   float temp = 0;
   tempSensor.get_temp(&temp);
-  Serial.println("Temperature: " + String(temp) + " C");
-
+  //Serial.println("Temperature: " + String(temp) + " C");
+  bluetoothSerial.print("Temperature " + String(temp));
+  bluetoothSerial.println("");
   if (temp < tempThreshold) {
     analogWrite(tempLed, 255);
-    Serial.println("Low temperature detected!");
+    //Serial.println("Low temperature detected!");
   } else {
     analogWrite(tempLed, 0);
   }
@@ -131,28 +148,22 @@ void checkEntrance(){
     Serial.println(" cm");
 }
 
-void setKitchenLED(String command) {
-  // Extract the RGB part of the command
-  int startIndex = command.indexOf(' ') + 1;
-  String rgbValues = command.substring(startIndex);
-
-  // Split the RGB values
-  int commaIndex1 = rgbValues.indexOf(',');
-  int commaIndex2 = rgbValues.indexOf(',', commaIndex1 + 1);
-
-  int red = rgbValues.substring(0, commaIndex1).toInt();
-  int green = rgbValues.substring(commaIndex1 + 1, commaIndex2).toInt();
-  int blue = rgbValues.substring(commaIndex2 + 1).toInt();
+void setKitchenLED(String command){
+  int ledNumber = command.toInt();
+  Serial.println("number: " + String(ledNumber));
+  if(ledNumber==1){
+    analogWrite(kitchenLed, 255);
+  }
+  else{
+    analogWrite(kitchenLed, 0);
+  }
 
   // Set the LED colors
-  analogWrite(redPinKitchen, red);
-  analogWrite(greenPinKitchen, green);
-  analogWrite(bluePinKitchen, blue);
-
-  Serial.println("Kitchen LED set to R:" + String(red) + " G:" + String(green) + " B:" + String(blue));
+  
 }
 
-void setLivingLED(String command) {
+
+void setMultiLED(String command) {
   // Extract the RGB part of the command
   int startIndex = command.indexOf(' ') + 1;
   String rgbValues = command.substring(startIndex);
@@ -170,26 +181,13 @@ void setLivingLED(String command) {
   analogWrite(greenPinLiving, green);
   analogWrite(bluePinLiving, blue);
 
-  Serial.println("Living LED set to R:" + String(red) + " G:" + String(green) + " B:" + String(blue));
-}
+  analogWrite(redPinKitchen, red);
+  analogWrite(greenPinKitchen, green);
+  analogWrite(bluePinKitchen, blue);
 
-void setEntranceLED(String command) {
-  // Extract the RGB part of the command
-  int startIndex = command.indexOf(' ') + 1;
-  String rgbValues = command.substring(startIndex);
-
-  // Split the RGB values
-  int commaIndex1 = rgbValues.indexOf(',');
-  int commaIndex2 = rgbValues.indexOf(',', commaIndex1 + 1);
-
-  int red = rgbValues.substring(0, commaIndex1).toInt();
-  int green = rgbValues.substring(commaIndex1 + 1, commaIndex2).toInt();
-  int blue = rgbValues.substring(commaIndex2 + 1).toInt();
-
-  // Set the LED colors
   analogWrite(redPinEntrance, red);
   analogWrite(greenPinEntrance, green);
   analogWrite(bluePinEntrance, blue);
 
-  Serial.println("Entrance LED set to R:" + String(red) + " G:" + String(green) + " B:" + String(blue));
+  Serial.println("LED set to R:" + String(red) + " G:" + String(green) + " B:" + String(blue));
 }

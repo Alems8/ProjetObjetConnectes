@@ -9,6 +9,7 @@ Servo myServo;
 const int servoPin = D8;
 
 
+
 /* NFC configuration */
 #define SPI_MOSI D11
 #define SPI_MISO D12
@@ -117,7 +118,8 @@ void loop() {
     default:
       break;
   }
-    // Manual Command Handling
+
+      // Manual Command Handling
   if (Serial.available()) {
     String command = Serial.readStringUntil('\n');
     command.trim();
@@ -140,11 +142,13 @@ bool isValidTag(rfalNfcDevice *device) {
 /* Unlock door function */
 void unlockDoor() {
   myServo.write(180);  
+  Serial.println("Unlocking door");
 }
 
 /* Lock door function */
 void lockDoor() {
   myServo.write(0);
+  Serial.println("Locking door");
 }
 
 
