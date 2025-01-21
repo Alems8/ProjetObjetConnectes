@@ -1,3 +1,4 @@
+// Import of the libraries
 #include <Servo.h>
 #include "nfc_utils.h"
 #include "rfal_nfc.h"
@@ -50,7 +51,7 @@ NdefClass ndef(&rfal_nfc);
 static rfalNfcDiscoverParam discParam;
 static uint8_t state = DEMO_ST_NOTINIT;
 
-/* Replace with your tag's UID */
+/* Valid tag UID for detection */
 const uint8_t validUID[] = {0x27, 0x59, 0xAF, 0x1C};
 
 void setup() {
@@ -103,7 +104,7 @@ void loop() {
         if (isValidTag(nfcDevice)) {
           Serial.println("Valid NFC Tag Detected. Unlocking Door...");
           unlockDoor();
-          delay(5000); // Keep door unlocked for 5 seconds
+          delay(10000); // Keep door unlocked for 10 seconds
           lockDoor();
           Serial.println("Door Locked.");
         } else {
@@ -119,7 +120,7 @@ void loop() {
       break;
   }
 
-      // Manual Command Handling
+      // Manual Command Handling used for testing
   if (Serial.available()) {
     String command = Serial.readStringUntil('\n');
     command.trim();
