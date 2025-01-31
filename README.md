@@ -15,6 +15,7 @@ Ce projet consiste à développer une maquette de maison connectée intégrant d
 ## Présentation du Projet
 
 - **Objectif :** Créer une maquette fonctionnelle d’une maison connectée intégrant des capteurs (gaz, température), des actuateurs (servo-moteur, LEDs), et une application mobile pour le contrôle à distance.
+
 - **Fonctionnalités principales :**
   - Détection de gaz inflammables avec alerte sonore et visuelle.
   - Surveillance de la température ambiante pour contrôler un radiateur simulé.
@@ -38,7 +39,7 @@ Ce projet consiste à développer une maquette de maison connectée intégrant d
 
 ### Logiciels :
 - [Arduino IDE](https://www.arduino.cc/en/software)
-- [MIT App Inventor](https://appinventor.mit.edu/)
+- [MIT App Inventor2](https://appinventor.mit.edu/)
 #### Bibliothèques Arduino nécessaires :
 
 ##### À télécharger manuellement :
@@ -57,6 +58,7 @@ Ce projet consiste à développer une maquette de maison connectée intégrant d
      - [Lien de téléchargement](https://github.com/stm32duino/NFC-RFAL).
    - **ndef_class.h**
      - [Lien de téléchargement](https://github.com/stm32duino/ST25R3911B)
+
 **Importation des bibliothèques téléchargées dans l’IDE Arduino :**
 1. Télécharger le fichier `.zip` depuis les liens ci-dessus.
 2. Ouvrir l’IDE Arduino.
@@ -133,9 +135,11 @@ La configuration de la carte Nucleo nécessite quelques étapes spécifiques pou
 ---
 
 #### Étape 4 : Installer l’application mobile
-1. Téléchargez l’application mobile APK fournie dans ce dépôt GitHub.  
+1. Téléchargez l’application mobile APK fournie dans ce dépôt GitHub via .  
 2. Installez l’application sur votre smartphone Android.  
 3. Connectez l’application au module Bluetooth HC05 de la maquette pour contrôler les dispositifs.
+
+**NB:** *L'application a été créée par assemblage de blocs qui sont par la suite traduits en code JAVA pour le bon fonctionnement de l'application*
 
 ### Utilisation
 
@@ -153,7 +157,8 @@ La configuration de la carte Nucleo nécessite quelques étapes spécifiques pou
    - **Mot de passe Bluetooth :** Le mot de passe sera probablement **1234** ou **0000** (selon la configuration par défaut).  
 
 3. Ouvrez l’application mobile installée sur votre smartphone.  
-4. Connectez-vous au module Bluetooth HC05 directement depuis l’application.  
+4. Connectez-vous au module Bluetooth HC05 directement depuis l’application.
+
 
 ---
 
@@ -163,11 +168,13 @@ Vous pouvez tester chaque fonctionnalité individuellement :
 1. **Capteur de gaz :**
    - Tenez un briquet (en mode gaz uniquement, sans flamme) devant le capteur MQ5.  
    - Cela devrait activer la LED rouge et le buzzer pour signaler la détection de gaz.  
-   - Les informations du capteur seront également envoyées à l’application mobile.  
+   - Les informations du capteur seront également envoyées à l’application mobile pour une lecture plus aisée.  
 
 2. **Capteur de température :**
    - Placez le capteur MCP9808 dans un environnement plus froid (e.g., réfrigérateur ou simplement souffler de l’air froid).  
    - Si la température est inférieure au seuil défini, la LED verte (représentant le radiateur) s’allumera.
+   - Les informations du capteur seront également envoyées à l’application mobile pour une lecture plus aisée.  
+
 
 3. **Porte intelligente (NFC + Servo) :**
    - Approchez un tag NFC devant le lecteur.  
@@ -178,6 +185,28 @@ Vous pouvez tester chaque fonctionnalité individuellement :
      - Remplacez l’UID dans le code par celui du tag que vous souhaitez utiliser.  
    - Une fois le tag correctement configuré et reconnu, le servo-moteur déverrouillera la porte.
 
+4. **(LED + RGB) et reconnaissance vocale :**
+   - Dans l'application, positionnez vous sur la page dediée à l'éclairage
+   - Veuillez vous connecter au module Bluetooth HC05 directement depuis l’application.
+      - **Allumage des LEDS**
+         - Deux modes d'activation se présentent à vous à savoir :
+
+         ![Eclairage](https://private-user-images.githubusercontent.com/185907809/408369263-9e1d0f9a-66e5-4a35-9793-0b9cbb6373d4.jpg?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzgyODkxMDcsIm5iZiI6MTczODI4ODgwNywicGF0aCI6Ii8xODU5MDc4MDkvNDA4MzY5MjYzLTllMWQwZjlhLTY2ZTUtNGEzNS05NzkzLTBiOWNiYjYzNzNkNC5qcGc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMTMxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDEzMVQwMjAwMDdaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1lYTQyMmI2ODNhYjQ0ODM1ZTRkODJmY2EwOGMxZTM5Y2NiYjlkNmJjNjczNWNmYzRjOWE5ZTE3NThlMjUwNzZiJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9._xmiWlpZK7OTVU_rRqMZ3wMrUYOEfEu7MRfi2KvcVCk)
+
+         - **Utilisation du bouton switch**
+            - Cliquez sur le bouton switch et la led s'allumera/s'éteindra selon son état précédant
+         - **Utilisation de la reconnaissance vocale**
+            - cliquez sur l'image du micro qui est en réalité un bouton
+            - Le système de reconnaissance est ainsi déclenché
+            - Dites alors "Allume cuisine" ou "Eteindre cuisine" selon votre désir
+            - Votre commande sera alors automatiquement traduite et transféré à la carte Arduino.
+      - **Changement de couleur des LEDS RGB**
+         - Sur le cercle coloré en dessous de la page se trouve une sorte de petit cercle pouvant servir de pointeur
+         - Déplacez ce pointeur en fonction de la couleur que vous souhaitez obtenir
+         - La couleur sélectionnée sera visible dans le carré juste à droite
+         - Une fois la couleur souhaitée obtenue, il suffit de cliquer sur le bouton "valider" et laisser la magie opérer
+
+         ![Couleurs](https://private-user-images.githubusercontent.com/185907809/408368733-b0621f87-d66b-4519-a84c-88ddfd2beea7.jpg?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzgyODkxMDcsIm5iZiI6MTczODI4ODgwNywicGF0aCI6Ii8xODU5MDc4MDkvNDA4MzY4NzMzLWIwNjIxZjg3LWQ2NmItNDUxOS1hODRjLTg4ZGRmZDJiZWVhNy5qcGc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMTMxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDEzMVQwMjAwMDdaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1iOTczMzFhOTExYzQ1Zjc1OWQzYmIzNzZlNTEyOWNhM2EyZDQ5ODU5YjRmMjI4ZTRjZjc2YzMxNGY4M2M3YTBiJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.fg32_VWkVXa39Mj-AhLRFQtUWoyUU32QvRmB1CQp3Vo)
 ---
 
 #### Étape 4 : Résolution des problèmes
